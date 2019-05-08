@@ -7,5 +7,14 @@
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    <ol>
+      <% for (customer of customers) { %>
+        <li>Name: <%= customer.email %>, 
+          LTV: <%= customer.ltv %>, 
+          Pref: <%= customer.preference %>,
+          created at: <%=customer.createdAt %>,
+          updated at: <%=customer.updatedAt %></li>
+      <% } %>
+    </ol>
   </body>
 </html>

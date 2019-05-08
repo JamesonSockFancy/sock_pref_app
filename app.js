@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
 
@@ -29,6 +30,8 @@ app.use('/users', usersRouter);
 
 mongoose.connect(process.env.MONGODB_URI)
 
+
+
 app.post('/subscription-created', async (req, res, next) => {
   const customerData = req.body;
   const customerEmail = customerData.email
@@ -36,6 +39,9 @@ app.post('/subscription-created', async (req, res, next) => {
   const customerFirstName = customerData.first_name
   const customerLastName = customerData.last_name
   const customerLTV = customerData.total_spent
+
+  console.log(customerData)
+  
 
   // read tags values
   
@@ -62,17 +68,24 @@ app.post('/subscription-created', async (req, res, next) => {
   }
 
   try {
-    const customer = new Customer({
-      email: customerEmail,
-      first_name: customerFirstName,
-      last_name: customerLastName,
-      ltv: customerLTV,
-      activated: customerStatus,
-      preference: customerPref
+    const customer = await Customer.findOne({ email: customerEmail})
+    
+    if(customer) {
+    Customer.findOneAndUpdate({email: customerEmail}, {preference: customerPref}, function(err, doc) {
+      if (err) return res.send(500, { error: err });
+      return res.send(customerEmail + "updated saved");
     })
-
-    const result = await customer.save();
-
+    } else {
+      const customer = new Customer({
+        email: customerEmail,
+        first_name: customerFirstName,
+        last_name: customerLastName,
+        ltv: customerLTV,
+        activated: customerStatus,
+        preference: customerPref
+      })
+      const result = await customer.save();
+    }
   } catch (err) {
     console.log(err);
   }
